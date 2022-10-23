@@ -5,10 +5,12 @@ import ILogin from '../interfaces/request/login';
 import ILoginService from '../interfaces/service/login';
 import Jwt from '../utils/jwt';
 import CustomizedError from '../utils/customizedError';
+import IPayloadToken from '../interfaces/payload/payloadToken';
 
 export default class LoginService implements ILoginService {
   private token: string | null;
   private jwt: Jwt;
+  private role: string;
 
   constructor() {
     this.jwt = new Jwt(process.env.JWT_SECRET as string);
@@ -23,5 +25,10 @@ export default class LoginService implements ILoginService {
 
     this.token = this.jwt.generateToken(user.username, user.role, user.email);
     return this.token;
+  }
+
+  validate({ role }: IPayloadToken): string {
+    this.role = role;
+    return this.role;
   }
 }
