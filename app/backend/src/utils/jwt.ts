@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+import CustomizedError from './customizedError';
 
 export default class Jwt {
   private key: string;
@@ -12,5 +13,15 @@ export default class Jwt {
     const token = jwt.sign(payload, this.key);
 
     return token;
+  }
+
+  public verifyToken(token: string) {
+    try {
+      const payload = jwt.verify(token, this.key);
+      return payload;
+    } catch (error: unknown) {
+      const { message } = error as Error;
+      throw new CustomizedError(401, message);
+    }
   }
 }
