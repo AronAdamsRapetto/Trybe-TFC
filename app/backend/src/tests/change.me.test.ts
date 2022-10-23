@@ -4,7 +4,7 @@ import * as chai from 'chai';
 import chaiHttp = require('chai-http');
 
 import { app } from '../app';
-import Example from '../database/models/ExampleModel';
+import User from '../database/models/UserModel';
 
 import { Response } from 'superagent';
 
@@ -12,34 +12,77 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
-describe('Seu teste', () => {
-  /**
-   * Exemplo do uso de stubs com tipos
-   */
+describe('Testes da rota /login', () => {
+  let response: Response;
+  let token: 'GVESNBOUVNIOAEVUB124578BCNAKJBVUA'
 
-  // let chaiHttpResponse: Response;
+  beforeEach(async () => {
+    sinon.stub(User, "findOne").resolves({
+        id: 1,
+        username: 'Admin',
+        role: 'admin',
+        email: 'admin@admin.com',
+        password: '$2a$08$xi.Hxk1czAO0nZR..B393u10aED0RQ1N3PAEXQ7HxtLjKPEZBu.PW',
+      } as User);
 
-  // before(async () => {
-  //   sinon
-  //     .stub(Example, "findOne")
-  //     .resolves({
-  //       ...<Seu mock>
-  //     } as Example);
-  // });
+    // sinon.stub(utils, generateToken).returns(token);
+  });
 
-  // after(()=>{
-  //   (Example.findOne as sinon.SinonStub).restore();
-  // })
+  afterEach(()=>{
+    (User.findOne as sinon.SinonStub).restore();
+  });
 
-  // it('...', async () => {
-  //   chaiHttpResponse = await chai
-  //      .request(app)
-  //      ...
+  it('Testa se ao mandar uma requisição sem email é retornado um erro 400', async () => {
+    response = await chai
+       .request(app).post('/login').send({
+        password: '123456'
+      });
 
-  //   expect(...)
-  // });
+    expect(response.status).to.be.equal(400);
+    expect(response.body).to.be.deep.equal({ message: 'All fields must be filled' });
+  });
 
-  it('Seu sub-teste', () => {
-    expect(false).to.be.eq(true);
+  it('Testa se ao mandar uma requisição sem password é retornado um erro 400', async () => {
+    response = await chai
+       .request(app).post('/login').send({
+        email: 'email@email.com',
+      });
+
+    expect(response.status).to.be.equal(400);
+    expect(response.body).to.be.deep.equal({ message: 'All fields must be filled' });
+  });
+
+  it('Testa se ao mandar uma requisição com password inválido retorna status 400', async () => {
+    response = await chai
+       .request(app).post('/login').send({
+        email: 'admin@admin.com',
+        password: 'a1',
+      });
+
+    expect(response.status).to.be.equal(400);
+    expect(response.body).to.be.deep.equal({ message: 'Incorrect email or password' });
+  });
+
+  it('Testa se ao mandar uma requisição com email inválido retorna status 400', async () => {
+    response = await chai
+       .request(app).post('/login').send({
+        email: 'admin.com',
+        password: 'a1', // preciso descobrir como desencriptar a senha;
+      });
+
+    expect(response.status).to.be.equal(400);
+    expect(response.body).to.be.deep.equal({ message: 'Incorrect email or password' });
+  });
+
+  it('Testa se ao mandar uma requisição correta retorna status 200', async () => {
+    response = await chai
+       .request(app).post('/login').send({
+        email: 'email@email.com',
+        password: 'a1', // descobrir como desencriptar a senha
+      });
+
+    expect(response.status).to.be.equal(200);
+    expect(response.body).to.be.deep.equal({ token }); // descomentar o generate token
   });
 });
+
