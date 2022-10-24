@@ -1,5 +1,5 @@
-import Teams from '../database/models/TeamModel';
+import Team from '../../database/models/TeamModel';
 
 export default interface ITeamService {
-  getAllTeams(): Team[]
+  getAllTeams(): Promise<Team[]>
 }
