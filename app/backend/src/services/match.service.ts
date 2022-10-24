@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import newResultMatch from '../interfaces/request/newResultMatch';
 import INewMatch from '../interfaces/request/newMatch';
 import Team from '../database/models/TeamModel';
 import Match from '../database/models/MatchModel';
@@ -8,7 +9,8 @@ import CustomizedError from '../utils/customizedError';
 export default class MatchService implements IMatchService {
   private _matches: Match[] | Match;
   private _validateTeams: Team[] | Team | null;
-  // private _updatedMatch: Match | [number, Match[]];
+  private _validateMatch: Match;
+  private _errorMessageNotFoundId = 'There is no team with such id!';
 
   public async getAllMatches(): Promise<Match[]> {
     this._matches = await Match.findAll({
@@ -42,7 +44,7 @@ export default class MatchService implements IMatchService {
 
     this._validateTeams = await Team.findAll({ where: { id: { [Op.or]: [homeTeam, awayTeam] } } });
     if (this._validateTeams.length < 2) {
-      throw new CustomizedError(404, 'There is no team with such id!');
+      throw new CustomizedError(404, this._errorMessageNotFoundId);
     }
 
     this._matches = await Match.create({
@@ -54,10 +56,22 @@ export default class MatchService implements IMatchService {
   public async finishMatch(id: string): Promise<void> {
     this._validateTeams = await Team.findOne({ where: { id } });
 
-    if (!this._validateTeams) throw new CustomizedError(404, 'There is no team with such id!');
+    if (!this._validateTeams) throw new CustomizedError(404, this._errorMessageNotFoundId);
 
     await Match.update({ inProgress: false }, {
       where: { id },
     });
+  }
+
+  public async updateMatch(
+    id: string,
+    { homeTeamGoals, awayTeamGoals }: newResultMatch,
+  ): Promise<void> {
+    this._validateMatch = await Match.findOne({ where: { id } }) as Match;
+
+    if (!this._validateMatch) throw new CustomizedError(404, this._errorMessageNotFoundId);
+    if (!this._validateMatch.inProgress) throw new CustomizedError(422, 'Match finshed!');
+
+    await Match.update({ homeTeamGoals, awayTeamGoals }, { where: { id } });
   }
 }

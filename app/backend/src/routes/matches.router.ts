@@ -9,6 +9,7 @@ const matchController = new MatchController(matchService);
 
 matchRouter.get('/', async (req, res) => matchController.getMatches(req, res));
 matchRouter.post('/', authUser, async (req, res) => matchController.createMatch(req, res));
+matchRouter.patch('/:id', async (req, res) => matchController.updateMatch(req, res));
 matchRouter.patch('/:id/finish', async (req, res) => matchController.finishMatch(req, res));
 
 export default matchRouter;

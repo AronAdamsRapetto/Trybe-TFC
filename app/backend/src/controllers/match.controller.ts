@@ -34,4 +34,12 @@ export default class MatchController {
     await this.matchService.finishMatch(id);
     res.status(200).json({ message: 'Finished' });
   }
+
+  public async updateMatch(req: Request, res: Response) {
+    const { body } = req;
+    const { id } = req.params;
+
+    await this.matchService.updateMatch(id, body);
+    res.status(200).json({ message: 'Updated!' });
+  }
 }
