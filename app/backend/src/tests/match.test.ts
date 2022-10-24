@@ -144,6 +144,19 @@ describe("Testes de integração das rotas de match", () => {
       });
 
       sinon.stub(Match, "create").resolves(mock as Match);
+
+      const mockTeams = [
+        {
+          "id": 1,
+          "teamName": "Avaí/Kindermann"
+        },
+        {
+          "id": 2,
+          "teamName": "internacional"
+        }
+       ] as unknown;
+
+      sinon.stub(Team, "findAll").resolves(mockTeams as Team[]);
     });
 
     afterEach(() => sinon.restore());
@@ -167,6 +180,7 @@ describe("Testes de integração das rotas de match", () => {
     });
 
     it("Testa se o endpoint POST /matches retorna um status 404 se tentar cadastrar um partida com time que não existe", async () => {
+      sinon.restore();
       const mock = [
         {
           "id": 1,
@@ -222,14 +236,7 @@ describe("Testes de integração das rotas de match", () => {
         .set("authorization", login.body.token);
 
       expect(response.status).to.be.equal(201);
-      expect(response.body).to.be.deep.equal({
-        awayTeam: 8,
-        awayTeamGoals: 2,
-        homeTeam: 16,
-        homeTeamGoals: 2,
-        id: 1,
-        inProgress: true,
-      });
+      expect(response.body).to.be.deep.equal(mock);
     });
   });
 
@@ -246,14 +253,14 @@ describe("Testes de integração das rotas de match", () => {
       const mock = [1, matchMock] as unknown
 
       sinon.stub(Match, 'update').resolves(mock as [number, Match[]]);
-      sinon.stub(Team, 'findOne').resolves(matchMock as Match);
+      sinon.stub(Match, 'findByPk').resolves(matchMock as Match);
     });
 
     afterEach(() => sinon.restore());
 
     it('Testa se o endpoint PATCH /matcher/:id/finish retorna um status 404 ao passa id que não existe', async () => {
       sinon.restore();
-      sinon.stub(Team, 'findOne').resolves(null);
+      sinon.stub(Team, 'findByPk').resolves(null);
 
       response = await chai.request(app).patch('/matches/99/finish');
 

@@ -9,7 +9,7 @@ import CustomizedError from '../utils/customizedError';
 export default class MatchService implements IMatchService {
   private _matches: Match[] | Match;
   private _validateTeams: Team[] | Team | null;
-  private _validateMatch: Match;
+  private _validateMatch: Match | null;
   private _errorMessageNotFoundId = 'There is no team with such id!';
 
   public async getAllMatches(): Promise<Match[]> {
@@ -54,11 +54,11 @@ export default class MatchService implements IMatchService {
   }
 
   public async finishMatch(id: string): Promise<void> {
-    this._validateTeams = await Team.findOne({ where: { id } });
+    this._validateMatch = await Match.findByPk(id);
 
-    if (!this._validateTeams) throw new CustomizedError(404, this._errorMessageNotFoundId);
+    if (!this._validateMatch) throw new CustomizedError(404, this._errorMessageNotFoundId);
 
-    await Match.update({ inProgress: false }, {
+    await Match.update({ inProgress: 0 }, {
       where: { id },
     });
   }
