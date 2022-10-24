@@ -2,6 +2,8 @@ import * as sinon from "sinon";
 import * as chai from "chai";
 import { app } from "../app";
 import Match from "../database/models/MatchModel";
+import Team from "../database/models/TeamModel";
+import User from "../database/models/UserModel";
 
 import { Response } from "superagent";
 // @ts-ignore
@@ -127,12 +129,21 @@ describe("Testes de integração das rotas de match", () => {
 
     let login: Response;
 
-    beforeEach(async () => {
-      sinon.stub(Match, "create").resolves(mock as Match);
+    beforeEach(async () => {      
+      sinon.stub(User, "findOne").resolves({
+        id: 1,
+        username: 'Admin',
+        role: 'admin',
+        email: 'admin@admin.com',
+        password: '$2a$08$xi.Hxk1czAO0nZR..B393u10aED0RQ1N3PAEXQ7HxtLjKPEZBu.PW',
+      } as User);
+      
       login = await chai.request(app).post("/login").send({
         email: "admin@admin.com",
         password: "secret_admin",
       });
+      
+      sinon.stub(Match, "create").resolves(mock as Match);
     });
 
     afterEach(() => sinon.restore());
@@ -156,17 +167,23 @@ describe("Testes de integração das rotas de match", () => {
     });
 
     it("Testa se o endpoint POST /matches retorna um status 404 se tentar cadastrar um partida com time que não existe", async () => {
-      sinon.stub(Match, "findOne").resolves(null);
+      const mock = [
+        {
+          "id": 1,
+          "teamName": "Avaí/Kindermann"
+        },
+       ] as unknown;
+
+      sinon.stub(Team, "findAll").resolves(mock as Team[]);
       response = await chai
         .request(app)
         .post("/matches")
         .send({
           homeTeam: 999,
-          awayTeam: 8,
+          awayTeam: 1,
           homeTeamGoals: 2,
           awayTeamGoals: 2,
-        })
-        .set("authorization", login.body.token);
+        }).set("authorization", login.body.token);
 
       expect(response.status).to.be.equal(404);
       expect(response.body).to.be.deep.equal({
@@ -206,7 +223,12 @@ describe("Testes de integração das rotas de match", () => {
 
       expect(response.status).to.be.equal(201);
       expect(response.body).to.be.deep.equal({
-        message: "It is not possible to create a match with two equal teams",
+        awayTeam: 8,
+        awayTeamGoals: 2,
+        homeTeam: 16,
+        homeTeamGoals: 2,
+        id: 1,
+        inProgress: true,
       });
     });
   });

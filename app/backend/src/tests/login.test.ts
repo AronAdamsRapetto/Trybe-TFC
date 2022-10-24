@@ -93,7 +93,7 @@ describe('Testes de integração do login', () => {
       response = await chai.request(app).get('/login/validate');
   
       expect(response.status).to.be.equal(401);
-      expect(response.body).to.be.deep.equal({ message: 'Invalid Token!' });
+      expect(response.body).to.be.deep.equal({ message: 'Token must be a valid token' });
     });
   
     it('Testa se o endpoint /login/validate retorna o status 200 ao mandar uma request com o token correto', async () => {
