@@ -235,24 +235,25 @@ describe("Testes de integração das rotas de match", () => {
 
   describe('Testes da rota PATCH /matches/:id/finish', () => {    
     beforeEach(() => {
-      const mock = [1, {
+      const matchMock = {
         id: 1,
         homeTeam: 16,
         homeTeamGoals: 2,
         awayTeam: 8,
         awayTeamGoals: 2,
         inProgress: true,
-      }] as unknown
+      } as unknown
+      const mock = [1, matchMock] as unknown
 
       sinon.stub(Match, 'update').resolves(mock as [number, Match[]]);
+      sinon.stub(Team, 'findOne').resolves(matchMock as Match);
     });
 
     afterEach(() => sinon.restore());
 
     it('Testa se o endpoint PATCH /matcher/:id/finish retorna um status 404 ao passa id que não existe', async () => {
       sinon.restore();
-      const failMock = [0, null] as unknown
-      sinon.stub(Match, 'update').resolves(failMock as [number, Match[]]);
+      sinon.stub(Team, 'findOne').resolves(null);
 
       response = await chai.request(app).patch('/matches/99/finish');
 
