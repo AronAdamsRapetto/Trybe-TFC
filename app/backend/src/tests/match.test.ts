@@ -269,12 +269,66 @@ describe("Testes de integração das rotas de match", () => {
     });
   });
 
-  // PATCH /matches/:id/finish
-  // O jogo deve existir no bando de dados
-  // Deve ser possível finalizar um jogo
+  describe('Testes da rota PATCH /matches/:id', () => {
+    beforeEach(() => {
+      const mockMatch = {
+        id: 1,
+        homeTeam: 16,
+        homeTeamGoals: 1,
+        awayTeam: 8,
+        awayTeamGoals: 3,
+        inProgress: 1,
+      } as unknown;
+      const mockUpdate = [1, mockMatch] as unknown;
 
-  // PATCH /matches/:id
-  // A partida deve existir no banco de dados
-  // Não deve ser possível atualizar partidas já finalizadas
-  // Deve ser possível atualiar partidas em andamento
+      sinon.stub(Match, 'findOne').resolves(mockMatch as Match);
+      sinon.stub(Match, 'update').resolves(mockUpdate as [number, Match[]]);
+    });
+
+    afterEach(() => sinon.restore());  
+
+    it('Testa se o endpoit PATCH /matches/:id retorna o erro 404 ao mandar uma request com match que não existe', async () => {
+      sinon.restore();
+      sinon.stub(Match, 'findOne').resolves(null);
+
+      response = await chai.request(app).patch('/matches/99').send({
+        homeTeamGoals: 3,
+        awayTeamGoals: 1,
+      });
+
+      expect(response.status).to.be.equal(404);
+      expect(response.body).to.be.deep.equal({ message: 'There is no team with such id!' });
+    });
+
+    it('Testa se o endpoit PATCH /matches/:id retorna o erro 422 ao mandar uma request com match já finalizada', async () => {
+      sinon.restore();
+      const mockMatch = {
+        id: 1,
+        homeTeam: 16,
+        homeTeamGoals: 0,
+        awayTeam: 8,
+        awayTeamGoals: 3,
+        inProgress: 0,
+      } as unknown;
+      sinon.stub(Match, 'findOne').resolves(mockMatch as Match);    
+
+      response = await chai.request(app).patch('/matches/1').send({
+        homeTeamGoals: 3,
+        awayTeamGoals: 1,
+      });
+
+      expect(response.status).to.be.equal(422);
+      expect(response.body).to.be.deep.equal({ message: 'Match finshed!' });
+    });
+
+    it('Testa se o endpoit PATCH /matches/:id atualiza corretamente a partida', async () => {
+      response = await chai.request(app).patch('/matches/1').send({
+        homeTeamGoals: 3,
+        awayTeamGoals: 1,
+      });
+
+      expect(response.status).to.be.equal(200);
+      expect(response.body).to.be.deep.equal({ message: 'Updated!' });
+    });
+  }); 
 });
