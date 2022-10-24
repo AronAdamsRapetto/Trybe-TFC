@@ -7,7 +7,8 @@ import CustomizedError from '../utils/customizedError';
 
 export default class MatchService implements IMatchService {
   private _matches: Match[] | Match;
-  private _validateTeams: Team[];
+  private _validateTeams: Team[] | Team | null;
+  // private _updatedMatch: Match | [number, Match[]];
 
   public async getAllMatches(): Promise<Match[]> {
     this._matches = await Match.findAll({
@@ -48,5 +49,15 @@ export default class MatchService implements IMatchService {
       homeTeam, awayTeam, homeTeamGoals, awayTeamGoals, inProgress: true,
     });
     return this._matches;
+  }
+
+  public async finishMatch(id: string): Promise<void> {
+    this._validateTeams = await Team.findOne({ where: { id } });
+
+    if (!this._validateTeams) throw new CustomizedError(404, 'There is no team with such id!');
+
+    await Match.update({ inProgress: false }, {
+      where: { id },
+    });
   }
 }
