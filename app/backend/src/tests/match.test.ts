@@ -44,6 +44,7 @@ describe('Testes de integração das rotas de match', () => {
         }
       }
     ] as unknown;
+
     beforeEach(() => {
       sinon.stub(Match, 'findAll').resolves(mock as Match[]);
     });
@@ -55,6 +56,62 @@ describe('Testes de integração das rotas de match', () => {
 
       expect(response.status).to.be.equal(200);
       expect(response.body).to.be.deep.equal(mock);
+    });
+  });
+
+  describe('Testes da rota GET /matches?inProgress', () => {
+    const mockInProgress = [
+      {
+        "id": 2,
+        "homeTeam": 16,
+        "homeTeamGoals": 2,
+        "awayTeam": 9,
+        "awayTeamGoals": 0,
+        "inProgress": true,
+        "teamHome": {
+          "teamName": "São Paulo"
+        },
+        "teamAway": {
+          "teamName": "Internacional"
+        }
+      }     
+    ] as unknown;
+
+    const mockFinished = [      
+        {
+          "id": 1,
+          "homeTeam": 16,
+          "homeTeamGoals": 1,
+          "awayTeam": 8,
+          "awayTeamGoals": 1,
+          "inProgress": false,
+          "teamHome": {
+            "teamName": "São Paulo"
+          },
+          "teamAway": {
+            "teamName": "Grêmio"
+          }
+        },        
+    ] as unknown;
+
+    afterEach(() => sinon.restore());
+
+    it('Testa se o endpoint GET /matches?inProgress=true retorna as partidas em progresso', async () => {
+      sinon.stub(Match, 'findAll').resolves(mockInProgress as Match[]);
+
+      response = await chai.request(app).get('/matches?inProgress=true');
+
+      expect(response.status).to.be.equal(200);
+      expect(response.body).to.be.deep.equal(mockInProgress);
+    });
+
+    it('Testa se o endpoint GET /matches?inProgress=false retorna as partidas finalizadas', async () => {
+      sinon.stub(Match, 'findAll').resolves(mockFinished as Match[]);
+
+      response = await chai.request(app).get('/matches?inProgress=false');
+
+      expect(response.status).to.be.equal(200);
+      expect(response.body).to.be.deep.equal(mockFinished);
     });
   });
 });
