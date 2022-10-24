@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import authUser from '../middlewares/authUser';
 import MatchController from '../controllers/match.controller';
 import MatchService from '../services/match.service';
 
@@ -7,5 +8,6 @@ const matchService = new MatchService();
 const matchController = new MatchController(matchService);
 
 matchRouter.get('/', async (req, res) => matchController.getMatches(req, res));
+matchRouter.post('/', authUser, async (req, res) => matchController.createMatch(req, res));
 
 export default matchRouter;

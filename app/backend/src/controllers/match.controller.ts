@@ -20,4 +20,11 @@ export default class MatchController {
     matches = await this.matchService.getAllMatches();
     res.status(200).json(matches);
   }
+
+  public async createMatch(req: Request, res: Response) {
+    const { body } = req;
+    const newMatch = await this.matchService.createMatch(body);
+
+    res.status(201).json(newMatch);
+  }
 }
