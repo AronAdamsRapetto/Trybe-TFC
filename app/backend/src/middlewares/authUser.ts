@@ -4,7 +4,7 @@ import Jwt from '../utils/jwt';
 
 const authUser = (req: Request, _res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
-  if (!authorization) throw new CustomizedError(401, 'Invalid Token!');
+  if (!authorization) throw new CustomizedError(401, 'Token must be a valid token');
 
   const jwt = new Jwt(process.env.JWT_SECRET as string);
 
