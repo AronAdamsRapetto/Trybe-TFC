@@ -142,7 +142,7 @@ describe("Testes de integração das rotas de match", () => {
         email: "admin@admin.com",
         password: "secret_admin",
       });
-      
+
       sinon.stub(Match, "create").resolves(mock as Match);
     });
 
@@ -230,6 +230,41 @@ describe("Testes de integração das rotas de match", () => {
         id: 1,
         inProgress: true,
       });
+    });
+  });
+
+  describe('Testes da rota PATCH /matches/:id/finish', () => {    
+    beforeEach(() => {
+      const mock = [1, {
+        id: 1,
+        homeTeam: 16,
+        homeTeamGoals: 2,
+        awayTeam: 8,
+        awayTeamGoals: 2,
+        inProgress: true,
+      }] as unknown
+
+      sinon.stub(Match, 'update').resolves(mock as [number, Match[]]);
+    });
+
+    afterEach(() => sinon.restore());
+
+    it('Testa se o endpoint PATCH /matcher/:id/finish retorna um status 404 ao passa id que não existe', async () => {
+      sinon.restore();
+      const failMock = [0, null] as unknown
+      sinon.stub(Match, 'update').resolves(failMock as [number, Match[]]);
+
+      response = await chai.request(app).patch('/matches/99/finish');
+
+      expect(response.status).to.be.equal(404);
+      expect(response.body).to.be.deep.equal({ message: 'There is no team with such id!' });
+    });
+
+    it('Testa se o endpoint PATCH /matcher/:id/finish altera a partida com sucesso', async () => {
+     response = await chai.request(app).patch('/matches/99/finish');
+
+      expect(response.status).to.be.equal(200);
+      expect(response.body).to.be.deep.equal({ message: 'Finished' });
     });
   });
 
