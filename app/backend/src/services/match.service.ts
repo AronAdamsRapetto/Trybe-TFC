@@ -14,4 +14,15 @@ export default class MatchService implements IMatchService {
     });
     return this.matches;
   }
+
+  public async getMatchesByProgress(inProgress: boolean): Promise<Match[]> {
+    this.matches = await Match.findAll({
+      where: { inProgress },
+      include: [
+        { model: Team, as: 'teamHome', attributes: { exclude: ['id'] } },
+        { model: Team, as: 'teamAway', attributes: { exclude: ['id'] } },
+      ],
+    });
+    return this.matches;
+  }
 }
