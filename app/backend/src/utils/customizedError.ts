@@ -1,8 +1,10 @@
 export default class CustomizedError extends Error {
-  private statusCode: number;
+  private _statusCode: number;
 
   constructor(statusCode: number, message: string) {
     super(message);
-    this.statusCode = statusCode;
+    this._statusCode = statusCode;
   }
+
+  get statusCode() { return this._statusCode; }
 }

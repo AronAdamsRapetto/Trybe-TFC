@@ -19,9 +19,8 @@ export default class Jwt {
     try {
       const payload = jwt.verify(token, this.key);
       return payload;
-    } catch (error: unknown) {
-      const { message } = error as Error;
-      throw new CustomizedError(401, message);
+    } catch (error) {
+      throw new CustomizedError(401, 'Token must be a valid token');
     }
   }
 }
