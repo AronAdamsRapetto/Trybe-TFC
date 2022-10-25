@@ -4,7 +4,7 @@ const errorMiddleware: ErrorRequestHandler = (error, req, res, _next) => {
   if (error.statusCode) {
     return res.status(error.statusCode).json({ message: error.message });
   }
-  return res.status(500).json({ message: 'Internal error!' });
+  return res.status(500).json({ message: error.message });
 };
 
 export default errorMiddleware;

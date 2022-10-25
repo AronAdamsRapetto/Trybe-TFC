@@ -40,7 +40,7 @@ WHERE in_progress = 0
 GROUP BY te.team_name
 ORDER BY totalPoints DESC, goalsBalance DESC, goalsFavor DESC, goalsOwn DESC;`;
 
-const sqlStrigTotal = `SELECT
+const sqlStringTotal = `SELECT
 name,
 SUM(le.totalPoints) AS totalPoints,
 SUM(totalGames) AS totalGames, 
@@ -86,4 +86,4 @@ ROUND((SUM(totalPoints) / (SUM(totalGames) * 3)) * 100, 2) AS efficiency FROM (
 GROUP BY le.name
 ORDER BY totalPoints DESC, goalsBalance DESC, goalsFavor DESC, goalsOwn DESC;`;
 
-export default { sqlStringHome, sqlStringAway, sqlStrigTotal };
+export default { sqlStringHome, sqlStringAway, sqlStringTotal };
