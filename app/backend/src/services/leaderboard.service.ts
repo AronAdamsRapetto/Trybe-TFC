@@ -1,13 +1,18 @@
 import sequelize from '../database/models';
 import ILeaderBoardResponse from '../interfaces/response/leaderboard';
 import ILeaderboardService from '../interfaces/service/leaderboard';
-import queryString from '../utils/queryStringLeaderBoard';
+import sql from '../utils/queryStringLeaderBoard';
 
 export default class LeaderboardService implements ILeaderboardService {
   private _leaderboard: unknown;
 
   public async getLeaderboardHome(): Promise<ILeaderBoardResponse[]> {
-    [this._leaderboard] = await sequelize.query(queryString);
+    [this._leaderboard] = await sequelize.query(sql.sqlStringHome);
+    return this._leaderboard as ILeaderBoardResponse[];
+  }
+
+  public async getLeaderboardAway(): Promise<ILeaderBoardResponse[]> {
+    [this._leaderboard] = await sequelize.query(sql.sqlStringAway);
     return this._leaderboard as ILeaderBoardResponse[];
   }
 }

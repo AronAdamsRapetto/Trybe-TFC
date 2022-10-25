@@ -11,4 +11,9 @@ leaderboardRouter.get(
   async (req, res) => leaderboardController.getLeaderboardHome(req, res),
 );
 
+leaderboardRouter.get(
+  '/away',
+  async (req, res) => leaderboardController.getLeaderboardAway(req, res),
+);
+
 export default leaderboardRouter;
